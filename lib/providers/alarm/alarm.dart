@@ -4,7 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smilarm/extensions/notifier.dart';
 import 'package:smilarm/providers/alarm/model.dart';
 
-class AlarmNotifier extends StateNotifier<AlarmState> with StatePersistance {
+class AlarmNotifier extends StateNotifier<AlarmState>
+    with StatePersistance<AlarmState> {
   AlarmNotifier() : super(const AlarmState()) {
     load();
   }
@@ -29,11 +30,11 @@ class AlarmNotifier extends StateNotifier<AlarmState> with StatePersistance {
     );
   }
 
-  void update(AlarmConfig alarm) {
+  void update(AlarmConfig updatedAlarm) {
     state = state.copyWith(
       alarms: [
         for (final alarm in state.alarms)
-          if (alarm == alarm) alarm else alarm,
+          if (updatedAlarm.id == alarm.id) updatedAlarm else alarm,
       ],
     );
   }

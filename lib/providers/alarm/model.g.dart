@@ -8,6 +8,7 @@ part of 'model.dart';
 
 _$AlarmConfigImpl _$$AlarmConfigImplFromJson(Map<String, dynamic> json) =>
     _$AlarmConfigImpl(
+      id: json['id'] as String,
       name: json['name'] as String,
       time: json['time'] as String,
       days: (json['days'] as List<dynamic>).map((e) => e as int).toList(),
@@ -20,6 +21,7 @@ _$AlarmConfigImpl _$$AlarmConfigImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$AlarmConfigImplToJson(_$AlarmConfigImpl instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'name': instance.name,
       'time': instance.time,
       'days': instance.days,

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:smilarm/modules/home/alarm_card.dart';
 import 'package:smilarm/modules/home/create_alarm.dart';
+import 'package:smilarm/providers/alarm/alarm.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -8,6 +10,7 @@ class HomePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final mediaQuery = MediaQuery.of(context);
+    final alarms = ref.watch(alarmProvider);
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -24,9 +27,14 @@ class HomePage extends HookConsumerWidget {
           ),
         ),
       ),
-      child: const SafeArea(
-        child: Text('Home'),
-      ),
+      child: SafeArea(
+          child: ListView.builder(
+        padding: const EdgeInsets.only(top: 16),
+        itemCount: alarms.alarms.length,
+        itemBuilder: (context, index) {
+          return AlarmCard(alarm: alarms.alarms[index]);
+        },
+      )),
     );
   }
 }

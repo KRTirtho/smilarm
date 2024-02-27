@@ -138,10 +138,13 @@ class CreateAlarmDialog extends HookConsumerWidget {
                         .resolveFrom(context)
                         .withOpacity(.1),
                     borderRadius: BorderRadius.circular(8),
+                    borderColor:
+                        CupertinoColors.systemGrey.resolveFrom(context),
                     selectedBorderColor: CupertinoColors.activeOrange,
                     hoverColor: Colors.transparent,
                     splashColor: Colors.transparent,
                     selectedColor: CupertinoColors.activeOrange,
+                    color: CupertinoColors.label.resolveFrom(context),
                     isSelected: days.value,
                     onPressed: (index) {
                       if (recurrence.value == AlarmRecurrence.once) {

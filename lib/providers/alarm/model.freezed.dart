@@ -20,6 +20,7 @@ AlarmConfig _$AlarmConfigFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$AlarmConfig {
+  String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
 
   /// The time of day that the alarm should go off.
@@ -32,7 +33,50 @@ mixin _$AlarmConfig {
   AlarmRecurrence get recurrence => throw _privateConstructorUsedError;
   DateTime? get lastTriggered => throw _privateConstructorUsedError;
   bool get enabled => throw _privateConstructorUsedError;
-
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String id,
+            String name,
+            String time,
+            List<int> days,
+            AlarmRecurrence recurrence,
+            DateTime? lastTriggered,
+            bool enabled)
+        def,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String id, String name, String time, List<int> days,
+            AlarmRecurrence recurrence, DateTime? lastTriggered, bool enabled)?
+        def,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String id, String name, String time, List<int> days,
+            AlarmRecurrence recurrence, DateTime? lastTriggered, bool enabled)?
+        def,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_AlarmConfig value) def,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_AlarmConfig value)? def,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_AlarmConfig value)? def,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $AlarmConfigCopyWith<AlarmConfig> get copyWith =>
@@ -46,7 +90,8 @@ abstract class $AlarmConfigCopyWith<$Res> {
       _$AlarmConfigCopyWithImpl<$Res, AlarmConfig>;
   @useResult
   $Res call(
-      {String name,
+      {String id,
+      String name,
       String time,
       List<int> days,
       AlarmRecurrence recurrence,
@@ -67,6 +112,7 @@ class _$AlarmConfigCopyWithImpl<$Res, $Val extends AlarmConfig>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? time = null,
     Object? days = null,
@@ -75,6 +121,10 @@ class _$AlarmConfigCopyWithImpl<$Res, $Val extends AlarmConfig>
     Object? enabled = null,
   }) {
     return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -112,7 +162,8 @@ abstract class _$$AlarmConfigImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String name,
+      {String id,
+      String name,
       String time,
       List<int> days,
       AlarmRecurrence recurrence,
@@ -131,6 +182,7 @@ class __$$AlarmConfigImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? time = null,
     Object? days = null,
@@ -139,6 +191,10 @@ class __$$AlarmConfigImplCopyWithImpl<$Res>
     Object? enabled = null,
   }) {
     return _then(_$AlarmConfigImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -171,17 +227,20 @@ class __$$AlarmConfigImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$AlarmConfigImpl implements _AlarmConfig {
   const _$AlarmConfigImpl(
-      {required this.name,
+      {required this.id,
+      required this.name,
       required this.time,
       required final List<int> days,
       required this.recurrence,
-      this.lastTriggered,
+      required this.lastTriggered,
       required this.enabled})
       : _days = days;
 
   factory _$AlarmConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$AlarmConfigImplFromJson(json);
 
+  @override
+  final String id;
   @override
   final String name;
 
@@ -212,7 +271,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
 
   @override
   String toString() {
-    return 'AlarmConfig(name: $name, time: $time, days: $days, recurrence: $recurrence, lastTriggered: $lastTriggered, enabled: $enabled)';
+    return 'AlarmConfig.def(id: $id, name: $name, time: $time, days: $days, recurrence: $recurrence, lastTriggered: $lastTriggered, enabled: $enabled)';
   }
 
   @override
@@ -220,6 +279,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AlarmConfigImpl &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.time, time) || other.time == time) &&
             const DeepCollectionEquality().equals(other._days, _days) &&
@@ -234,6 +294,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      id,
       name,
       time,
       const DeepCollectionEquality().hash(_days),
@@ -248,6 +309,74 @@ class _$AlarmConfigImpl implements _AlarmConfig {
       __$$AlarmConfigImplCopyWithImpl<_$AlarmConfigImpl>(this, _$identity);
 
   @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(
+            String id,
+            String name,
+            String time,
+            List<int> days,
+            AlarmRecurrence recurrence,
+            DateTime? lastTriggered,
+            bool enabled)
+        def,
+  }) {
+    return def(id, name, time, days, recurrence, lastTriggered, enabled);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String id, String name, String time, List<int> days,
+            AlarmRecurrence recurrence, DateTime? lastTriggered, bool enabled)?
+        def,
+  }) {
+    return def?.call(id, name, time, days, recurrence, lastTriggered, enabled);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String id, String name, String time, List<int> days,
+            AlarmRecurrence recurrence, DateTime? lastTriggered, bool enabled)?
+        def,
+    required TResult orElse(),
+  }) {
+    if (def != null) {
+      return def(id, name, time, days, recurrence, lastTriggered, enabled);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_AlarmConfig value) def,
+  }) {
+    return def(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_AlarmConfig value)? def,
+  }) {
+    return def?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_AlarmConfig value)? def,
+    required TResult orElse(),
+  }) {
+    if (def != null) {
+      return def(this);
+    }
+    return orElse();
+  }
+
+  @override
   Map<String, dynamic> toJson() {
     return _$$AlarmConfigImplToJson(
       this,
@@ -257,16 +386,19 @@ class _$AlarmConfigImpl implements _AlarmConfig {
 
 abstract class _AlarmConfig implements AlarmConfig {
   const factory _AlarmConfig(
-      {required final String name,
+      {required final String id,
+      required final String name,
       required final String time,
       required final List<int> days,
       required final AlarmRecurrence recurrence,
-      final DateTime? lastTriggered,
+      required final DateTime? lastTriggered,
       required final bool enabled}) = _$AlarmConfigImpl;
 
   factory _AlarmConfig.fromJson(Map<String, dynamic> json) =
       _$AlarmConfigImpl.fromJson;
 
+  @override
+  String get id;
   @override
   String get name;
   @override
