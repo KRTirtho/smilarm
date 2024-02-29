@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smilarm/modules/home/alarm_card.dart';
@@ -15,6 +16,13 @@ class HomePage extends HookConsumerWidget {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
+        leading: CupertinoButton(
+          child: const Icon(CupertinoIcons.airplane),
+          onPressed: () {
+            FlutterOverlayWindow.showOverlay();
+            FlutterOverlayWindow.shareData("fire");
+          },
+        ),
         middle: const Text('Smilarm'),
         trailing: CupertinoButton(
           child: const Icon(CupertinoIcons.add),

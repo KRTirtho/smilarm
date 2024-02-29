@@ -4,7 +4,7 @@ description: "A new Flutter project."
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0-279.0.dev <4.0.0'
+  sdk: ">=3.3.0-279.0.dev <4.0.0"
 
 dependencies:
   flutter:
@@ -28,6 +28,7 @@ dependencies:
   flutter_local_notifications: ^16.3.2
   flutter_styled_toast: ^2.2.1
   disable_battery_optimization: ^1.1.1
+  flutter_overlay_window: ^0.4.3
 
 dev_dependencies:
   flutter_test:
@@ -41,3 +42,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/

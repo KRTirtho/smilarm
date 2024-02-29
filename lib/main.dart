@@ -1,15 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    hide NotificationVisibility;
 
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smilarm/collection/routes.dart';
+import 'package:smilarm/pages/alarm/alarm.dart';
 import 'package:smilarm/providers/alarm/model.dart';
 import 'package:smilarm/providers/preferences/preferences.dart';
 import 'package:smilarm/utils/hooks/use_disable_battery_optimizations.dart';
@@ -20,78 +22,33 @@ void fireAlarm(int processId, Map<String, dynamic> rawData) async {
 
   // Initialize plugins
 
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final alarm = AlarmConfig.fromJson(rawData);
+  print('Alarm fired ${alarm.name}');
 
-  await flutterLocalNotificationsPlugin.initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+  await FlutterOverlayWindow.showOverlay(
+    visibility: NotificationVisibility.visibilityPublic,
+    overlayTitle: 'Wake up!',
+    overlayContent: 'Bruv wake up!',
+  );
+  await FlutterOverlayWindow.shareData("fire");
+}
+
+@pragma("vm:entry-point")
+void overlayMain() async {
+  // ignore: missing_provider_scope
+  runApp(
+    const CupertinoApp(
+      debugShowCheckedModeBanner: true,
+      title: "Wake up!",
+      home: AlarmScreen(),
     ),
   );
-
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'com.example.smilarm.channel',
-    'Smilarm Notifications',
-    description: 'This channel is used for important notifications.',
-    importance: Importance.high,
-    showBadge: true,
-    enableVibration: true,
-    playSound: true,
-  );
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
-
-  // config
-  final alarm = AlarmConfig.fromJson(rawData);
-  const androidNotificationDetails = AndroidNotificationDetails(
-    'smilarm_id_1',
-    'com.example.smilarm.channel',
-    channelDescription: 'Stupid Channel',
-    importance: Importance.max,
-    priority: Priority.high,
-    ticker: 'ticker',
-  );
-
-  await flutterLocalNotificationsPlugin.show(
-    alarm.id,
-    alarm.name,
-    'You gotta wake up buddy!!!!',
-    const NotificationDetails(android: androidNotificationDetails),
-    payload: jsonEncode(rawData), // to stop the alarm from playing sounds
-  );
-
-  print('Alarm fired: ${alarm.name}');
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await AndroidAlarmManager.initialize();
-
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  await flutterLocalNotificationsPlugin.initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-    ),
-  );
-
-  const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'com.example.smilarm.channel',
-    'Smilarm Notifications',
-    description: 'This channel is used for important notifications.',
-    importance: Importance.high,
-    showBadge: true,
-    enableVibration: true,
-    playSound: true,
-  );
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -130,6 +87,17 @@ class MyApp extends HookConsumerWidget {
                     AndroidFlutterLocalNotificationsPlugin>()
                 ?.requestNotificationsPermission();
             if (granted != true) {
+              exit(0);
+            }
+          }
+
+          /// check if overlay permission is granted
+          final overlayPermission =
+              await FlutterOverlayWindow.isPermissionGranted();
+
+          if (!overlayPermission) {
+            final hasGranted = await FlutterOverlayWindow.requestPermission();
+            if (hasGranted != true) {
               exit(0);
             }
           }
