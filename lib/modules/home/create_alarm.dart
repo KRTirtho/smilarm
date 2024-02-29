@@ -5,8 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:smilarm/extensions/duration.dart';
 import 'package:smilarm/providers/alarm/alarm.dart';
 import 'package:smilarm/providers/alarm/model.dart';
+import 'package:smilarm/utils/uid.dart';
+
+final timeHmFormatter = DateFormat.Hm();
 
 class CreateAlarmDialog extends HookConsumerWidget {
   const CreateAlarmDialog({super.key});
@@ -172,33 +176,46 @@ class CreateAlarmDialog extends HookConsumerWidget {
                 const Gap(48),
                 CupertinoButton.filled(
                   child: const Text('Save'),
-                  onPressed: () {
+                  onPressed: () async {
                     final currentTime = DateTime.now();
                     final currentTimeWithTimeOfDay = currentTime.copyWith(
                       hour: time.value.hour,
                       minute: time.value.minute,
                     );
-                    final isOnceAndPastTime =
-                        recurrence.value == AlarmRecurrence.once &&
-                            currentTime.weekday == days.value.indexOf(true) &&
-                            currentTime.isAfter(currentTimeWithTimeOfDay);
+                    final isOnceAndPastTime = recurrence.value ==
+                            AlarmRecurrence.once &&
+                        (currentTime.weekday - 1) == days.value.indexOf(true) &&
+                        currentTime.isAfter(currentTimeWithTimeOfDay);
 
                     if (formKey.currentState?.validate() != true ||
                         isOnceAndPastTime) return;
 
-                    alarmNotifier.add(
+                    await alarmNotifier.add(
                       AlarmConfig(
+                        id: uid(),
                         name: nameController.text,
                         enabled: enabled.value,
-                        time: DateFormat.Hm().format(currentTimeWithTimeOfDay),
+                        time: timeHmFormatter.format(currentTimeWithTimeOfDay),
                         days: days.value
-                            .mapIndexed((i, value) => value ? i : null)
+                            .mapIndexed((i, value) => value ? i + 1 : null)
                             .whereNotNull()
                             .toList(),
                         recurrence: recurrence.value,
+                        lastTriggered: null,
                       ),
                     );
-                    Navigator.of(context).pop();
+                    final firstFireTime = currentTimeWithTimeOfDay.add(
+                      Duration(
+                        days: (days.value.indexOf(true) - currentTime.weekday) %
+                            7,
+                      ),
+                    );
+                    final leftTimeToFire =
+                        firstFireTime.difference(DateTime.now());
+
+                    Navigator.of(context).pop(
+                      '${nameController.text} will go off in ${leftTimeToFire.formatHHmm()}',
+                    );
                   },
                 ),
               ],

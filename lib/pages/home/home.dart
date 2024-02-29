@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smilarm/modules/home/alarm_card.dart';
 import 'package:smilarm/modules/home/create_alarm.dart';
@@ -17,14 +18,22 @@ class HomePage extends HookConsumerWidget {
         middle: const Text('Smilarm'),
         trailing: CupertinoButton(
           child: const Icon(CupertinoIcons.add),
-          onPressed: () => showCupertinoModalPopup(
-            context: context,
-            builder: (context) => SizedBox(
-              width: double.infinity,
-              height: mediaQuery.size.height,
-              child: const CreateAlarmDialog(),
-            ),
-          ),
+          onPressed: () async {
+            final result = await showCupertinoModalPopup<String>(
+              context: context,
+              builder: (context) => SizedBox(
+                width: double.infinity,
+                height: mediaQuery.size.height,
+                child: const CreateAlarmDialog(),
+              ),
+            );
+
+            if (result == null || !context.mounted) {
+              return;
+            }
+
+            showToast(result, context: context);
+          },
         ),
       ),
       child: SafeArea(

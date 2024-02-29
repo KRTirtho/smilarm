@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:smilarm/extensions/string.dart';
 import 'package:smilarm/modules/home/create_alarm.dart';
 import 'package:smilarm/providers/alarm/alarm.dart';
@@ -17,6 +18,8 @@ const daysToString = [
   'Sun',
 ];
 
+final timeJmFormatter = DateFormat.jm();
+
 class AlarmCard extends HookConsumerWidget {
   final AlarmConfig alarm;
   const AlarmCard({super.key, required this.alarm});
@@ -26,8 +29,12 @@ class AlarmCard extends HookConsumerWidget {
     final theme = CupertinoTheme.of(context);
     final alarmNotifier = ref.read(alarmProvider.notifier);
 
-    final [hh, mm] = alarm.time.split(':');
-    final days = alarm.days.map((day) => daysToString[day]).join('  ');
+    final days = alarm.days.map((day) => daysToString[day - 1]).join('  ');
+    final [hours, minutes] = alarm.time.split(':');
+    final dateTime = DateTime.now().copyWith(
+      hour: int.parse(hours),
+      minute: int.parse(minutes),
+    );
 
     return Card(
       color: CupertinoColors.secondarySystemFill.resolveFrom(context),
@@ -91,7 +98,7 @@ class AlarmCard extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '$hh:$mm',
+                  timeJmFormatter.format(dateTime),
                   style: const TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w900,

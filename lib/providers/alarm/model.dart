@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 part 'model.freezed.dart';
 part 'model.g.dart';
@@ -9,12 +9,10 @@ enum AlarmRecurrence {
   once,
 }
 
-const uuid = Uuid();
-
 @freezed
 class AlarmConfig with _$AlarmConfig {
-  const factory AlarmConfig.def({
-    required String id,
+  const factory AlarmConfig({
+    required int id,
     required String name,
 
     /// The time of day that the alarm should go off.
@@ -29,27 +27,18 @@ class AlarmConfig with _$AlarmConfig {
     required bool enabled,
   }) = _AlarmConfig;
 
-  factory AlarmConfig({
-    required String name,
-    required String time,
-    required List<int> days,
-    required AlarmRecurrence recurrence,
-    DateTime? lastTriggered,
-    required bool enabled,
-  }) {
-    return _AlarmConfig(
-      id: uuid.v4(),
-      name: name,
-      time: time,
-      days: days,
-      recurrence: recurrence,
-      lastTriggered: lastTriggered,
-      enabled: enabled,
-    );
-  }
-
   factory AlarmConfig.fromJson(Map<String, dynamic> json) =>
       _$AlarmConfigFromJson(json);
+}
+
+extension TimeOfDayFromTime on AlarmConfig {
+  TimeOfDay get timeOfDay {
+    final [hh, mm] = time.split(':');
+    return TimeOfDay(
+      hour: int.parse(hh),
+      minute: int.parse(mm),
+    );
+  }
 }
 
 @freezed

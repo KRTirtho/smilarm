@@ -24,13 +24,8 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.smilarm"
-    compileSdk flutter.compileSdkVersion
+    compileSdk 33
     ndkVersion flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 
     kotlinOptions {
         jvmTarget = '1.8'
@@ -41,6 +36,7 @@ android {
     }
 
     defaultConfig {
+        multiDexEnabled true
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.smilarm"
         // You can update the following values to match your application needs.
@@ -50,6 +46,14 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
+
+    compileOptions {
+      // Flag to enable support for the new language APIs
+      coreLibraryDesugaringEnabled true
+      // Sets Java compatibility to Java 8
+      sourceCompatibility JavaVersion.VERSION_1_8
+      targetCompatibility JavaVersion.VERSION_1_8
+  }
 
     buildTypes {
         release {
@@ -73,4 +77,5 @@ dependencies {
           because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
       }
   }
+  coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
 }
