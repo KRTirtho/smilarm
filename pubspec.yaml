@@ -37,8 +37,23 @@ dev_dependencies:
   json_serializable: ^6.7.1
   custom_lint: ^0.6.0
   riverpod_lint: ^2.3.9
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
   assets:
     - assets/
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/logo.png"
+  adaptive_icon_foreground: "assets/logo.png"
+  adaptive_icon_background: "#ffffff"
+  min_sdk_android: 26
+  web:
+    generate: false
+  ios: false
+  windows:
+    generate: false
+  macos:
+    generate: false
