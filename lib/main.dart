@@ -2,16 +2,16 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide NotificationVisibility;
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:smilarm/app.dart';
-import 'package:smilarm/pages/alarm/alarm.dart';
 import 'package:smilarm/providers/alarm/model.dart';
 import 'package:smilarm/stores/kv/kv.dart';
 
@@ -24,18 +24,22 @@ void fireAlarm(int processId, Map<String, dynamic> rawData) async {
 
   await KVStore.initialize();
 
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.example.smilarm.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
+
   final audioPlayer = AudioPlayer();
 
-  final receivePort = ReceivePort();
+  final alarmIsolateReceivePort = ReceivePort();
   IsolateNameServer.registerPortWithName(
-    receivePort.sendPort,
+    alarmIsolateReceivePort.sendPort,
     alarmIsolatePortName,
   );
 
   final mainIsolateSendPort =
       IsolateNameServer.lookupPortByName(mainIsolatePortName);
-
-  await audioPlayer.setReleaseMode(ReleaseMode.loop);
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -78,28 +82,38 @@ void fireAlarm(int processId, Map<String, dynamic> rawData) async {
     ],
   );
 
-  await audioPlayer.play(
-    AssetSource('spiderman.mp3'),
-  );
-
-  KVStore.setRinging(true);
+  KVStore.setAlarmId(alarm.id);
 
   await flutterLocalNotificationsPlugin.show(
     alarm.id,
     alarm.name,
     alarm.message,
     const NotificationDetails(android: androidNotificationDetails),
-    payload: jsonEncode(rawData), // to stop the alarm from playing sounds
   );
 
-  mainIsolateSendPort?.send("ringing");
+  mainIsolateSendPort?.send(jsonEncode(rawData));
 
-  receivePort.listen((v) {
+  alarmIsolateReceivePort.listen((v) {
     if (v == "stop") {
       audioPlayer.stop();
     }
   });
+
+  await audioPlayer.setAudioSource(
+    ProgressiveAudioSource(
+      Uri.parse("asset:///assets/spiderman.mp3"),
+      tag: const MediaItem(
+        id: "alarm",
+        title: "Alarm",
+      ),
+    ),
+  );
+  await audioPlayer.play();
+  await audioPlayer.setLoopMode(LoopMode.one);
 }
+
+List<CameraDescription> cameraDescriptions = [];
+final mainIsolateReceivePort = ReceivePort();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -114,33 +128,14 @@ void main() async {
     ),
   );
 
-  final receivePort = ReceivePort();
   IsolateNameServer.registerPortWithName(
-    receivePort.sendPort,
+    mainIsolateReceivePort.sendPort,
     mainIsolatePortName,
   );
 
-  receivePort.listen((message) {
-    FlutterOverlayWindow.showOverlay();
-  });
+  cameraDescriptions = await availableCameras();
 
   runApp(
     const ProviderScope(child: MyApp()),
-  );
-}
-
-@pragma("vm:entry-point")
-void overlayMain() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await KVStore.initialize();
-
-  // ignore: missing_provider_scope
-  runApp(
-    const CupertinoApp(
-      debugShowCheckedModeBanner: true,
-      title: "Wake up!",
-      home: AlarmPage(),
-    ),
   );
 }

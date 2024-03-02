@@ -1,22 +1,25 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
   <application
     android:label="smilarm"
     android:name="${applicationName}"
     android:icon="@mipmap/ic_launcher">
     <activity
-      android:name=".MainActivity"
+      android:name="com.ryanheise.audioservice.AudioServiceActivity"
       android:exported="true"
       android:launchMode="singleTop"
       android:theme="@style/LaunchTheme"
       android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
       android:hardwareAccelerated="true"
       android:windowSoftInputMode="adjustResize">
+
       <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -38,6 +41,7 @@
         <data android:scheme="smilarm" />
       </intent-filter>
     </activity>
+
     <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
     <meta-data
@@ -72,8 +76,19 @@
       </intent-filter>
     </receiver>
 
-    <service android:name="flutter.overlay.window.flutter_overlay_window.OverlayService"
-      android:exported="false" />
+    <service android:name="com.ryanheise.audioservice.AudioService"
+      android:foregroundServiceType="mediaPlayback"
+      android:exported="true" tools:ignore="Instantiatable">
+      <intent-filter>
+        <action android:name="android.media.browse.MediaBrowserService" />
+      </intent-filter>
+    </service>
+    <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver"
+      android:exported="true" tools:ignore="Instantiatable">
+      <intent-filter>
+        <action android:name="android.intent.action.MEDIA_BUTTON" />
+      </intent-filter>
+    </receiver>
   </application>
   <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility?hl=en and

@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:smilarm/main.dart';
 import 'package:smilarm/collection/routes.dart';
 import 'package:smilarm/providers/preferences/preferences.dart';
-import 'package:smilarm/stores/kv/kv.dart';
 import 'package:smilarm/utils/hooks/use_disable_battery_optimizations.dart';
 
 class MyApp extends HookConsumerWidget {
@@ -31,19 +31,6 @@ class MyApp extends HookConsumerWidget {
     useDisableBatteryOptimizations();
 
     useEffect(() {
-      if (KVStore.ringing) {
-        FlutterOverlayWindow.showOverlay(
-          overlayTitle: 'Wake up!',
-          overlayContent: 'Bruv wake up!',
-        );
-      }
-
-      return () {
-        FlutterOverlayWindow.closeOverlay();
-      };
-    }, []);
-
-    useEffect(() {
       () async {
         if (Platform.isAndroid) {
           FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -62,17 +49,12 @@ class MyApp extends HookConsumerWidget {
               exit(0);
             }
           }
-
-          final hasOverlayPermission =
-              await FlutterOverlayWindow.isPermissionGranted();
-          if (hasOverlayPermission != true) {
-            final granted = await FlutterOverlayWindow.requestPermission();
-            if (granted != true) {
-              exit(0);
-            }
-          }
         }
       }();
+
+      mainIsolateReceivePort.listen((message) {
+        router.go("/alarm");
+      });
       return null;
     }, []);
 

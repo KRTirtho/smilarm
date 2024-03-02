@@ -13,8 +13,12 @@ class KVStore {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  static bool get ringing => preferences.getBool('ringing') ?? false;
-  static Future<void> setRinging(bool value) async {
-    await preferences.setBool('ringing', value);
+  static int? get alarmId => preferences.getInt('alarmId');
+  static Future<void> setAlarmId(int? value) async {
+    if (value == null) {
+      await preferences.remove('alarmId');
+      return;
+    }
+    await preferences.setInt('alarmId', value);
   }
 }
