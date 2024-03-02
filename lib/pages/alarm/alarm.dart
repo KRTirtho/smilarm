@@ -1,8 +1,10 @@
 import 'dart:ui';
 
+import 'package:camera/camera.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -12,7 +14,9 @@ import 'package:smilarm/modules/home/create_alarm.dart';
 import 'package:smilarm/providers/alarm/alarm.dart';
 import 'package:smilarm/stores/kv/kv.dart';
 
-class AlarmPage extends ConsumerWidget {
+List<CameraDescription> cameraDescriptions = [];
+
+class AlarmPage extends HookConsumerWidget {
   const AlarmPage({super.key});
 
   Future<void> stop(BuildContext context) async {
@@ -31,6 +35,16 @@ class AlarmPage extends ConsumerWidget {
     final alarm = alarms.alarms.firstWhereOrNull(
       (alarm) => alarm.id == KVStore.alarmId,
     );
+
+    useEffect(() {
+      if (context.mounted) {
+        availableCameras().then((cameras) {
+          cameraDescriptions = cameras;
+        });
+      }
+
+      return () {};
+    }, []);
 
     return SafeArea(
       child: CupertinoPageScaffold(
@@ -65,6 +79,7 @@ class AlarmPage extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
+                        color: CupertinoColors.black,
                       ),
                     ),
                     const Gap(5),
@@ -73,6 +88,7 @@ class AlarmPage extends ConsumerWidget {
                         alarm!.message!,
                         style: const TextStyle(
                           fontSize: 18,
+                          color: CupertinoColors.black,
                         ),
                       ),
                   ],

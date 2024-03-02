@@ -33,13 +33,13 @@ class MyApp extends HookConsumerWidget {
     useEffect(() {
       () async {
         if (Platform.isAndroid) {
-          FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+          final flutterLocalNotificationsPlugin =
               FlutterLocalNotificationsPlugin();
 
           final hasPermission = await flutterLocalNotificationsPlugin
               .resolvePlatformSpecificImplementation<
                   AndroidFlutterLocalNotificationsPlugin>()
-              ?.canScheduleExactNotifications();
+              ?.areNotificationsEnabled();
           if (hasPermission != true) {
             final granted = await flutterLocalNotificationsPlugin
                 .resolvePlatformSpecificImplementation<

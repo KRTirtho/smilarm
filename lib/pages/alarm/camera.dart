@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
-import 'package:smilarm/main.dart';
+import 'package:smilarm/pages/alarm/alarm.dart';
 import 'package:smilarm/utils/hooks/use_camera_controller.dart';
 import 'package:smilarm/utils/hooks/use_face_detector.dart';
 

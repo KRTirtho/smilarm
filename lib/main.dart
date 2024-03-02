@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    hide NotificationVisibility;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -21,6 +19,7 @@ const alarmIsolatePortName = 'alarmIsolate';
 @pragma('vm:entry-point')
 void fireAlarm(int processId, Map<String, dynamic> rawData) async {
   print('Alarm fired');
+  WidgetsFlutterBinding.ensureInitialized();
 
   await KVStore.initialize();
 
@@ -50,10 +49,10 @@ void fireAlarm(int processId, Map<String, dynamic> rawData) async {
   );
 
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'com.example.smilarm.channel',
+    'com.example.smilarm.channel.alarm',
     'Smilarm Notifications',
     description: 'This channel is used for important notifications.',
-    importance: Importance.high,
+    importance: Importance.max,
     showBadge: true,
     enableVibration: true,
     playSound: true,
@@ -67,8 +66,8 @@ void fireAlarm(int processId, Map<String, dynamic> rawData) async {
   // config
   final alarm = AlarmConfig.fromJson(rawData);
   const androidNotificationDetails = AndroidNotificationDetails(
-    'smilarm_id_1',
-    'com.example.smilarm.channel',
+    'com.example.smilarm.channel.alarm',
+    'Smilarm Notifications',
     channelDescription: 'Stupid Channel',
     importance: Importance.max,
     priority: Priority.high,
@@ -93,26 +92,28 @@ void fireAlarm(int processId, Map<String, dynamic> rawData) async {
 
   mainIsolateSendPort?.send(jsonEncode(rawData));
 
-  alarmIsolateReceivePort.listen((v) {
+  alarmIsolateReceivePort.listen((v) async {
     if (v == "stop") {
-      audioPlayer.stop();
+      await audioPlayer.stop();
+      await audioPlayer.dispose();
     }
   });
 
+  await audioPlayer.setLoopMode(LoopMode.one);
   await audioPlayer.setAudioSource(
-    ProgressiveAudioSource(
-      Uri.parse("asset:///assets/spiderman.mp3"),
+    AudioSource.asset(
+      "assets/spiderman.mp3",
       tag: const MediaItem(
         id: "alarm",
         title: "Alarm",
       ),
     ),
+    preload: true,
   );
+  await audioPlayer.setVolume(1);
   await audioPlayer.play();
-  await audioPlayer.setLoopMode(LoopMode.one);
 }
 
-List<CameraDescription> cameraDescriptions = [];
 final mainIsolateReceivePort = ReceivePort();
 
 void main() async {
@@ -132,8 +133,6 @@ void main() async {
     mainIsolateReceivePort.sendPort,
     mainIsolatePortName,
   );
-
-  cameraDescriptions = await availableCameras();
 
   runApp(
     const ProviderScope(child: MyApp()),
