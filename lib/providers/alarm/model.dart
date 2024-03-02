@@ -14,6 +14,7 @@ class AlarmConfig with _$AlarmConfig {
   const factory AlarmConfig({
     required int id,
     required String name,
+    String? message,
 
     /// The time of day that the alarm should go off.
     /// Format: "HH:mm"

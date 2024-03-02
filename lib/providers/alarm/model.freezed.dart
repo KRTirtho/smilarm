@@ -22,6 +22,7 @@ AlarmConfig _$AlarmConfigFromJson(Map<String, dynamic> json) {
 mixin _$AlarmConfig {
   int get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
+  String? get message => throw _privateConstructorUsedError;
 
   /// The time of day that the alarm should go off.
   /// Format: "HH:mm"
@@ -49,6 +50,7 @@ abstract class $AlarmConfigCopyWith<$Res> {
   $Res call(
       {int id,
       String name,
+      String? message,
       String time,
       List<int> days,
       AlarmRecurrence recurrence,
@@ -71,6 +73,7 @@ class _$AlarmConfigCopyWithImpl<$Res, $Val extends AlarmConfig>
   $Res call({
     Object? id = null,
     Object? name = null,
+    Object? message = freezed,
     Object? time = null,
     Object? days = null,
     Object? recurrence = null,
@@ -86,6 +89,10 @@ class _$AlarmConfigCopyWithImpl<$Res, $Val extends AlarmConfig>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      message: freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
       time: null == time
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -121,6 +128,7 @@ abstract class _$$AlarmConfigImplCopyWith<$Res>
   $Res call(
       {int id,
       String name,
+      String? message,
       String time,
       List<int> days,
       AlarmRecurrence recurrence,
@@ -141,6 +149,7 @@ class __$$AlarmConfigImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? name = null,
+    Object? message = freezed,
     Object? time = null,
     Object? days = null,
     Object? recurrence = null,
@@ -156,6 +165,10 @@ class __$$AlarmConfigImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      message: freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
       time: null == time
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -186,6 +199,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
   const _$AlarmConfigImpl(
       {required this.id,
       required this.name,
+      this.message,
       required this.time,
       required final List<int> days,
       required this.recurrence,
@@ -200,6 +214,8 @@ class _$AlarmConfigImpl implements _AlarmConfig {
   final int id;
   @override
   final String name;
+  @override
+  final String? message;
 
   /// The time of day that the alarm should go off.
   /// Format: "HH:mm"
@@ -228,7 +244,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
 
   @override
   String toString() {
-    return 'AlarmConfig(id: $id, name: $name, time: $time, days: $days, recurrence: $recurrence, lastTriggered: $lastTriggered, enabled: $enabled)';
+    return 'AlarmConfig(id: $id, name: $name, message: $message, time: $time, days: $days, recurrence: $recurrence, lastTriggered: $lastTriggered, enabled: $enabled)';
   }
 
   @override
@@ -238,6 +254,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
             other is _$AlarmConfigImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.message, message) || other.message == message) &&
             (identical(other.time, time) || other.time == time) &&
             const DeepCollectionEquality().equals(other._days, _days) &&
             (identical(other.recurrence, recurrence) ||
@@ -253,6 +270,7 @@ class _$AlarmConfigImpl implements _AlarmConfig {
       runtimeType,
       id,
       name,
+      message,
       time,
       const DeepCollectionEquality().hash(_days),
       recurrence,
@@ -277,6 +295,7 @@ abstract class _AlarmConfig implements AlarmConfig {
   const factory _AlarmConfig(
       {required final int id,
       required final String name,
+      final String? message,
       required final String time,
       required final List<int> days,
       required final AlarmRecurrence recurrence,
@@ -290,6 +309,8 @@ abstract class _AlarmConfig implements AlarmConfig {
   int get id;
   @override
   String get name;
+  @override
+  String? get message;
   @override
 
   /// The time of day that the alarm should go off.

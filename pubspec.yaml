@@ -23,8 +23,6 @@ dependencies:
   gap: ^3.0.1
   collection: ^1.18.0
   intl: ^0.18.1
-  uuid: ^4.3.3
-  android_intent_plus: ^4.0.3
   flutter_local_notifications: ^16.3.2
   flutter_styled_toast: ^2.2.1
   disable_battery_optimization: ^1.1.1

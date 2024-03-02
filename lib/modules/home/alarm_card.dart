@@ -122,7 +122,7 @@ class AlarmCard extends HookConsumerWidget {
                 onPressed: () {
                   showCupertinoModalPopup(
                     context: context,
-                    builder: (context) => const CreateAlarmDialog(),
+                    builder: (context) => CreateAlarmDialog(alarm: alarm),
                   );
                 },
                 padding: EdgeInsets.zero,

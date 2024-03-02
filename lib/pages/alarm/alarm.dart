@@ -1,33 +1,18 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:gap/gap.dart';
+import 'package:smilarm/main.dart';
+import 'package:smilarm/stores/kv/kv.dart';
 
-class AlarmScreen extends HookWidget {
-  const AlarmScreen({super.key});
+class AlarmPage extends HookWidget {
+  const AlarmPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final player = useMemoized(() => AudioPlayer(), []);
-
-    useEffect(() {
-      if (!context.mounted) return null;
-      final subscription =
-          FlutterOverlayWindow.overlayListener.listen((data) async {
-        if (data != "fire") return;
-        await player.setReleaseMode(ReleaseMode.loop);
-        await player.play(
-          AssetSource("spiderman.mp3"),
-          volume: 1,
-        );
-      });
-      return () async {
-        await player.dispose();
-        subscription.cancel();
-      };
-    }, []);
 
     return SizedBox(
       width: mediaQuery.size.width * mediaQuery.devicePixelRatio,
@@ -44,8 +29,12 @@ class AlarmScreen extends HookWidget {
                 CupertinoButton(
                   child: const Text('Dismiss'),
                   onPressed: () async {
-                    await player.stop();
+                    final alarmCbSendPort = IsolateNameServer.lookupPortByName(
+                      alarmIsolatePortName,
+                    );
+                    alarmCbSendPort?.send("stop");
                     await FlutterOverlayWindow.closeOverlay();
+                    await KVStore.setRinging(false);
                   },
                 ),
               ],

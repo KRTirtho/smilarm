@@ -1,138 +1,146 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:isolate';
+import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide NotificationVisibility;
 
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:smilarm/collection/routes.dart';
+import 'package:smilarm/app.dart';
 import 'package:smilarm/pages/alarm/alarm.dart';
 import 'package:smilarm/providers/alarm/model.dart';
-import 'package:smilarm/providers/preferences/preferences.dart';
-import 'package:smilarm/utils/hooks/use_disable_battery_optimizations.dart';
+import 'package:smilarm/stores/kv/kv.dart';
+
+const mainIsolatePortName = 'mainIsolate';
+const alarmIsolatePortName = 'alarmIsolate';
 
 @pragma('vm:entry-point')
 void fireAlarm(int processId, Map<String, dynamic> rawData) async {
   print('Alarm fired');
 
-  // Initialize plugins
+  await KVStore.initialize();
 
-  final alarm = AlarmConfig.fromJson(rawData);
-  print('Alarm fired ${alarm.name}');
+  final audioPlayer = AudioPlayer();
 
-  await FlutterOverlayWindow.showOverlay(
-    visibility: NotificationVisibility.visibilityPublic,
-    overlayTitle: 'Wake up!',
-    overlayContent: 'Bruv wake up!',
+  final receivePort = ReceivePort();
+  IsolateNameServer.registerPortWithName(
+    receivePort.sendPort,
+    alarmIsolatePortName,
   );
-  await FlutterOverlayWindow.shareData("fire");
-}
 
-@pragma("vm:entry-point")
-void overlayMain() async {
-  // ignore: missing_provider_scope
-  runApp(
-    const CupertinoApp(
-      debugShowCheckedModeBanner: true,
-      title: "Wake up!",
-      home: AlarmScreen(),
+  final mainIsolateSendPort =
+      IsolateNameServer.lookupPortByName(mainIsolatePortName);
+
+  await audioPlayer.setReleaseMode(ReleaseMode.loop);
+
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  await flutterLocalNotificationsPlugin.initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     ),
   );
+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'com.example.smilarm.channel',
+    'Smilarm Notifications',
+    description: 'This channel is used for important notifications.',
+    importance: Importance.high,
+    showBadge: true,
+    enableVibration: true,
+    playSound: true,
+  );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  // config
+  final alarm = AlarmConfig.fromJson(rawData);
+  const androidNotificationDetails = AndroidNotificationDetails(
+    'smilarm_id_1',
+    'com.example.smilarm.channel',
+    channelDescription: 'Stupid Channel',
+    importance: Importance.max,
+    priority: Priority.high,
+    ticker: 'ticker',
+    fullScreenIntent: true,
+    actions: [
+      AndroidNotificationAction(
+        "dismiss",
+        "Dismiss",
+      ),
+    ],
+  );
+
+  await audioPlayer.play(
+    AssetSource('spiderman.mp3'),
+  );
+
+  KVStore.setRinging(true);
+
+  await flutterLocalNotificationsPlugin.show(
+    alarm.id,
+    alarm.name,
+    alarm.message,
+    const NotificationDetails(android: androidNotificationDetails),
+    payload: jsonEncode(rawData), // to stop the alarm from playing sounds
+  );
+
+  mainIsolateSendPort?.send("ringing");
+
+  receivePort.listen((v) {
+    if (v == "stop") {
+      audioPlayer.stop();
+    }
+  });
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await KVStore.initialize();
+
   await AndroidAlarmManager.initialize();
 
-  runApp(const ProviderScope(child: MyApp()));
+  await FlutterLocalNotificationsPlugin().initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    ),
+  );
+
+  final receivePort = ReceivePort();
+  IsolateNameServer.registerPortWithName(
+    receivePort.sendPort,
+    mainIsolatePortName,
+  );
+
+  receivePort.listen((message) {
+    FlutterOverlayWindow.showOverlay();
+  });
+
+  runApp(
+    const ProviderScope(child: MyApp()),
+  );
 }
 
-class MyApp extends HookConsumerWidget {
-  const MyApp({super.key});
+@pragma("vm:entry-point")
+void overlayMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  @override
-  Widget build(BuildContext context, ref) {
-    final router = ref.watch(routerProvider);
-    final themeMode = ref.watch(
-      preferencesProvider.select((state) => state.themeMode),
-    );
+  await KVStore.initialize();
 
-    final brightness = switch (themeMode) {
-      ThemeMode.light => Brightness.light,
-      ThemeMode.dark => Brightness.dark,
-      _ => MediaQuery.platformBrightnessOf(context),
-    };
-
-    useDisableBatteryOptimizations();
-
-    useEffect(() {
-      () async {
-        if (Platform.isAndroid) {
-          FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
-
-          final hasPermission = await flutterLocalNotificationsPlugin
-              .resolvePlatformSpecificImplementation<
-                  AndroidFlutterLocalNotificationsPlugin>()
-              ?.canScheduleExactNotifications();
-          if (hasPermission != true) {
-            final granted = await flutterLocalNotificationsPlugin
-                .resolvePlatformSpecificImplementation<
-                    AndroidFlutterLocalNotificationsPlugin>()
-                ?.requestNotificationsPermission();
-            if (granted != true) {
-              exit(0);
-            }
-          }
-
-          /// check if overlay permission is granted
-          final overlayPermission =
-              await FlutterOverlayWindow.isPermissionGranted();
-
-          if (!overlayPermission) {
-            final hasGranted = await FlutterOverlayWindow.requestPermission();
-            if (hasGranted != true) {
-              exit(0);
-            }
-          }
-        }
-      }();
-      return null;
-    }, []);
-
-    useEffect(() {
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarBrightness: brightness,
-          statusBarIconBrightness: brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light,
-        ),
-      );
-
-      return null;
-    }, [themeMode]);
-
-    return CupertinoApp.router(
-      title: 'Smilarm',
-      theme: CupertinoThemeData(
-        primaryColor: Colors.deepOrange,
-        applyThemeToAll: true,
-        brightness: brightness,
-      ),
-      localizationsDelegates: const [
-        DefaultMaterialLocalizations.delegate,
-        DefaultCupertinoLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      routerConfig: router,
-    );
-  }
+  // ignore: missing_provider_scope
+  runApp(
+    const CupertinoApp(
+      debugShowCheckedModeBanner: true,
+      title: "Wake up!",
+      home: AlarmPage(),
+    ),
+  );
 }

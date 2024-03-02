@@ -10,6 +10,7 @@ _$AlarmConfigImpl _$$AlarmConfigImplFromJson(Map<String, dynamic> json) =>
     _$AlarmConfigImpl(
       id: json['id'] as int,
       name: json['name'] as String,
+      message: json['message'] as String?,
       time: json['time'] as String,
       days: (json['days'] as List<dynamic>).map((e) => e as int).toList(),
       recurrence: $enumDecode(_$AlarmRecurrenceEnumMap, json['recurrence']),
@@ -23,6 +24,7 @@ Map<String, dynamic> _$$AlarmConfigImplToJson(_$AlarmConfigImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
+      'message': instance.message,
       'time': instance.time,
       'days': instance.days,
       'recurrence': _$AlarmRecurrenceEnumMap[instance.recurrence]!,
